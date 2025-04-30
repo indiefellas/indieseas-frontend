@@ -5,6 +5,7 @@ import Base from "../layouts/base.astro"
 <Base>
 	<div class="main-container">
 		<header class="top">
+			<a href="/roulette">IndieRoulette™</a>
 			<a href="/webrings">Webrings</a>
 			<a href="/buttons">Buttons</a>
 		</header>
@@ -50,6 +51,12 @@ import Base from "../layouts/base.astro"
 
 		h1.jua {
 			font-size: 6em;
+		}
+
+		@media (width <= 700px) {
+			h1.jua {
+				font-size: 3.5em;
+			}
 		}
 	</style>
 </Base>

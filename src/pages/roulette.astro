@@ -1,0 +1,72 @@
+---
+import Base from "../layouts/base.astro"
+import { MockData } from "../assets/mock";
+const url = new URL(Astro.request.url);
+const q = url.searchParams.get("q");
+export const prerender = false;
+
+function randArray<T>(array: T[]): T {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+let site;
+
+if (q) {
+    let results = MockData.filter((item) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        const descriptionLower = item.description?.toLowerCase() || "";
+        const urlLower = item.url?.toLowerCase() || "";
+        return (
+            titleLower.includes(q) ||
+            descriptionLower.includes(q) ||
+            urlLower.includes(q)
+        );
+    });
+
+    site = results.length > 0 ? randArray(results) : randArray(MockData);
+} else {
+    site = randArray(MockData);
+}
+---
+
+<Base title="IndieRoulette™ - IndieSeas">
+    <div class="roulette-links">
+        <a href="/">Go back</a>
+        <a href="javascript:void()" onclick="location.reload()">Roll another</a>
+        <p>Currently viewing <a href={'//' + site.url}>{site.url}</a></p>
+    </div>
+
+    <div class="roulette-iframe">
+        <iframe src={'//' + site.url} title={site.title}></iframe>
+    </div>
+
+    <script>
+        let iframe = document.querySelector('iframe');
+        iframe.src = iframe.src;
+    </script>
+
+    <style slot="head">
+        .roulette-links {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            padding-bottom: 12px;
+
+            @media (width <= 640px) {
+                flex-direction: column;
+                gap: 3px;
+            }
+        }
+
+        .roulette-iframe {
+            height: 100%;
+
+            iframe {
+                width: 100%;
+                height: calc(100% - 12px);
+                border: none;
+                padding-bottom: 12px;
+            }
+        }
+    </style>
+</Base>

@@ -1,61 +1,69 @@
 ---
 export const prerender = false;
-import { MockData } from '../assets/mock';
-import Base from "../layouts/base.astro"
+import { MockData } from "../assets/mock";
+import Base from "../layouts/base.astro";
 
 const url = new URL(Astro.request.url);
-const q = url.searchParams.get('q');
-let page = Number(url.searchParams.get('page')) || 1;
-const size = Number(url.searchParams.get('size')) || 10;
-const first = url.searchParams.get('first') !== null ? true : false;
+const q = url.searchParams.get("q");
+let page = Number(url.searchParams.get("page")) || 1;
+const size = Number(url.searchParams.get("size")) || 10;
+const first = url.searchParams.get("first") !== null ? true : false;
 
 function chunkArray(array: any[], size: number): any[][] {
-  const chunkedArray = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunkedArray.push(array.slice(i, i + size));
-  }
-  return chunkedArray;
+    const chunkedArray = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunkedArray.push(array.slice(i, i + size));
+    }
+    return chunkedArray;
 }
 
 console.log(q);
 
-let searchResults: ({
-    url: string;
-    title: string;
-    description: null;
-} | {
-    url: string;
-    title: string;
-    description: string;
-} | {
-    url: string;
-    title: null;
-    description: null;
-} | {
-    url: string;
-    title: null;
-    description: string;
-})[][] = [];
+let searchResults: (
+    | {
+          url: string;
+          title: string;
+          description: null;
+      }
+    | {
+          url: string;
+          title: string;
+          description: string;
+      }
+    | {
+          url: string;
+          title: null;
+          description: null;
+      }
+    | {
+          url: string;
+          title: null;
+          description: string;
+      }
+)[][] = [];
+
+let results: any[] = []
 
 if (q) {
-  searchResults = chunkArray(MockData.filter(item => {
-    const titleLower = item.title?.toLowerCase() || '';
-    const descriptionLower = item.description?.toLowerCase() || '';
-    const urlLower = item.url?.toLowerCase() || '';
-    return (
-      titleLower.includes(q) ||
-      descriptionLower.includes(q) ||
-      urlLower.includes(q)
-    );
-  }), size);
+    results = MockData.filter((item) => {
+        const titleLower = item.title?.toLowerCase() || "";
+        const descriptionLower = item.description?.toLowerCase() || "";
+        const urlLower = item.url?.toLowerCase() || "";
+        return (
+            titleLower.includes(q) ||
+            descriptionLower.includes(q) ||
+            urlLower.includes(q)
+        );
+    });
+    searchResults = chunkArray(results, size);
 
-  if (searchResults.length < page) page = 1;
+    if (searchResults.length < page) page = 1;
 
-  if (first && searchResults.length > 0) {
-    return Astro.redirect('//' + searchResults[0][0].url, 302);
-  }
+    if (first && searchResults.length > 0) {
+        return Astro.redirect("//" + searchResults[0][0].url, 302);
+    }
 } else {
-    return Astro.redirect('/', 302)
+    return Astro.redirect("/", 302);
 }
 
 function generatePages(count: number) {
@@ -63,46 +71,63 @@ function generatePages(count: number) {
 
     for (let i = 1; count >= i; i++) {
         let u = new URL(url);
-        u.searchParams.set('page', `${i}`)
+        u.searchParams.set("page", `${i}`);
         pages.push(`<a href=${u.toString()}>
-            ${page === i ? `<b>${i}</b>`: i}
-        </a>`)
+            ${page === i ? `<b>${i}</b>` : i}
+        </a>`);
     }
 
-    return pages.join(' ');
+    return pages.join(" ");
 }
 
-console.log(searchResults)
+console.log(searchResults);
 ---
 
 <Base title={q + " - IndieSeas"}>
     <header>
         <div class="search-container">
-			<a href="/"><h1 class="jua">IndieSeas</h1></a>
-	
-			<form action="search" autocomplete="off" method="get" role="search">
-				<input type="search" name="q" placeholder="Search..." aria-label="Search" value={q} />
-				<button type="submit">Search</button>
-			</form>
-		</div>
+            <a href="/"><h1 class="jua">IndieSeas</h1></a>
+
+            <form action="search" autocomplete="off" method="get" role="search">
+                <input
+                    type="search"
+                    name="q"
+                    placeholder="Search..."
+                    aria-label="Search"
+                    value={q}
+                />
+                <button type="submit">Search</button>
+            </form>
+        </div>
     </header>
 
     <div class="results">
-        {searchResults.length > 0 ?
-            searchResults[page - 1].map((r) => <div class="result">
-                <p class="small">{r.url}</p>
-                <a href={'//' + r.url}><h1>{r.title || r.url}</h1></a>
-                <p>{r.description}</p>
-            </div>) :
-            <div>
-                <h1>No results found.</h1>
-                <p>Try modifying your query?</p>
-            </div>
+        {
+            searchResults.length > 0 ? (
+                searchResults[page - 1].map((r) => (
+                    <div class="result">
+                        <p class="small">{r.url}</p>
+                        <a href={"//" + r.url}>
+                            <h2>{r.title || r.url}</h2>
+                        </a>
+                        <p id="desc">{r.description}</p>
+                    </div>
+                ))
+            ) : (
+                <div>
+                    <h1>No results found.</h1>
+                    <p>Try modifying your query?</p>
+                </div>
+            )
         }
     </div>
 
-    <div class="pages">
-        <p>Pages:</p> <div set:html={generatePages(searchResults.length)}></div>
+    <div class="footer">
+        <div class="pages">
+            <p>Pages:</p>
+            <div set:html={generatePages(searchResults.length)} />
+        </div>
+        <p>Found {results.length} results on {MockData.length} total pages</p>
     </div>
 
     <style slot="head">
@@ -111,11 +136,17 @@ console.log(searchResults)
             flex-direction: column;
             gap: 24px;
 
-            margin: 24px 64px;
+            margin: 24px 275px;
+            margin-right: 24px;
 
             a {
                 display: inline-block;
                 width: fit-content;
+            }
+
+            .result {
+                max-width: 600px;
+                overflow-wrap: break-word;
             }
         }
 
@@ -123,7 +154,15 @@ console.log(searchResults)
             display: flex;
             flex-direction: row;
             gap: 12px;
-            margin: 6px 64px;
+        }
+
+        .footer {
+            margin: 6px 275px;
+            margin-right: 24px;
+        }
+
+        button[type="submit"] {
+            min-width: 88px;
         }
 
         .search-container {
@@ -138,6 +177,36 @@ console.log(searchResults)
                 input[type="search"] {
                     max-width: 480px;
                 }
+            }
+        }
+
+        @media (width <= 1280px) {
+            .results,
+            .footer {
+                margin-left: 64px;
+                margin-right: 64px;
+            }
+        }
+
+        @media (width <= 700px) {
+            .search-container {
+                flex-direction: column;
+                gap: 16px;
+                margin: 6px 0;
+
+                input {
+                    width: 100%;
+                }
+
+                h1 {
+                    text-align: center;
+                }
+            }
+
+            .results,
+            .footer {
+                margin-left: 0px;
+                margin-right: 0px;
             }
         }
     </style>

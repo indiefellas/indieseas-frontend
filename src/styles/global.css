@@ -46,6 +46,7 @@ a:hover:nth-of-type(odd), nav a:nth-of-type(odd).active {
     margin: 0;
     padding: 0;
     transition: all 250ms;
+    overflow-wrap: anywhere;
 }
 
 html,
@@ -70,6 +71,10 @@ main {
     flex-grow: 1;
 }
 
+img {
+    max-width: 100%;
+}
+
 input, button {
     background: var(--acc);
     color: var(--main);
@@ -85,7 +90,13 @@ input, button {
 }
 
 input[type="search"] {
-    min-width: 30vw;
+    width: 30vw;
+    min-width: 450px;
+
+    @media (width <= 700px) {
+        width: 90vw;
+        min-width: auto;
+    }
 }
 
 .btn-container {
@@ -93,6 +104,10 @@ input[type="search"] {
     flex-direction: row;
     gap: 12px;
     justify-content: center;
+}
+
+h1.jua {
+    overflow-wrap: normal;
 }
 
 form[action="search"] {
@@ -110,6 +125,11 @@ footer {
 .side {
     display: flex;
     justify-content: space-between;
+
+    @media (width <= 700px) {
+        justify-content: baseline;
+        flex-direction: column;
+    }
 }
 
 footer .links {
