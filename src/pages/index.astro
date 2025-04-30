@@ -1,16 +1,55 @@
 ---
-
+import Base from "../layouts/base.astro"
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base>
+	<div class="main-container">
+		<header class="top">
+			<a href="/webrings">Webrings</a>
+			<a href="/buttons">Buttons</a>
+		</header>
+		<div class="center-container">
+			<h1 class="jua">IndieSeas</h1>
+	
+			<form action="search" autocomplete="off" method="get" role="search">
+				<input type="search" name="q" placeholder="Search..." aria-label="Search" />
+				<div class="btn-container">
+					<button type="submit">Search</button>
+					<button name="first">First page!</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<style slot="head">
+		.main-container {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		header {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			justify-content: end;
+			gap: 12px;
+			padding: 12px;
+		}
+
+		.center-container {
+			max-width: 1200px;
+			margin: 0 auto;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			height: inherit;
+		}
+
+		h1.jua {
+			font-size: 6em;
+		}
+	</style>
+</Base>

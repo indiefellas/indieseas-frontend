@@ -6,9 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "start": "node ./entry.mjs"
   },
   "dependencies": {
-    "astro": "^5.7.9"
+    "@astrojs/node": "^9.2.1",
+    "@nurodev/astro-bun": "^2.0.5",
+    "astro": "^5.7.9",
+    "ultimate-express": "^1.4.8"
   }
 }

@@ -1,0 +1,144 @@
+---
+export const prerender = false;
+import { MockData } from '../assets/mock';
+import Base from "../layouts/base.astro"
+
+const url = new URL(Astro.request.url);
+const q = url.searchParams.get('q');
+let page = Number(url.searchParams.get('page')) || 1;
+const size = Number(url.searchParams.get('size')) || 10;
+const first = url.searchParams.get('first') !== null ? true : false;
+
+function chunkArray(array: any[], size: number): any[][] {
+  const chunkedArray = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunkedArray.push(array.slice(i, i + size));
+  }
+  return chunkedArray;
+}
+
+console.log(q);
+
+let searchResults: ({
+    url: string;
+    title: string;
+    description: null;
+} | {
+    url: string;
+    title: string;
+    description: string;
+} | {
+    url: string;
+    title: null;
+    description: null;
+} | {
+    url: string;
+    title: null;
+    description: string;
+})[][] = [];
+
+if (q) {
+  searchResults = chunkArray(MockData.filter(item => {
+    const titleLower = item.title?.toLowerCase() || '';
+    const descriptionLower = item.description?.toLowerCase() || '';
+    const urlLower = item.url?.toLowerCase() || '';
+    return (
+      titleLower.includes(q) ||
+      descriptionLower.includes(q) ||
+      urlLower.includes(q)
+    );
+  }), size);
+
+  if (searchResults.length < page) page = 1;
+
+  if (first && searchResults.length > 0) {
+    return Astro.redirect('//' + searchResults[0][0].url, 302);
+  }
+} else {
+    return Astro.redirect('/', 302)
+}
+
+function generatePages(count: number) {
+    let pages = [];
+
+    for (let i = 1; count >= i; i++) {
+        let u = new URL(url);
+        u.searchParams.set('page', `${i}`)
+        pages.push(`<a href=${u.toString()}>
+            ${page === i ? `<b>${i}</b>`: i}
+        </a>`)
+    }
+
+    return pages.join(' ');
+}
+
+console.log(searchResults)
+---
+
+<Base title={q + " - IndieSeas"}>
+    <header>
+        <div class="search-container">
+			<a href="/"><h1 class="jua">IndieSeas</h1></a>
+	
+			<form action="search" autocomplete="off" method="get" role="search">
+				<input type="search" name="q" placeholder="Search..." aria-label="Search" value={q} />
+				<button type="submit">Search</button>
+			</form>
+		</div>
+    </header>
+
+    <div class="results">
+        {searchResults.length > 0 ?
+            searchResults[page - 1].map((r) => <div class="result">
+                <p class="small">{r.url}</p>
+                <a href={'//' + r.url}><h1>{r.title || r.url}</h1></a>
+                <p>{r.description}</p>
+            </div>) :
+            <div>
+                <h1>No results found.</h1>
+                <p>Try modifying your query?</p>
+            </div>
+        }
+    </div>
+
+    <div class="pages">
+        <p>Pages:</p> <div set:html={generatePages(searchResults.length)}></div>
+    </div>
+
+    <style slot="head">
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+
+            margin: 24px 64px;
+
+            a {
+                display: inline-block;
+                width: fit-content;
+            }
+        }
+
+        .pages {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            margin: 6px 64px;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: row;
+            gap: 32px;
+            margin: 6px 64px;
+
+            form {
+                flex-direction: row;
+
+                input[type="search"] {
+                    max-width: 480px;
+                }
+            }
+        }
+    </style>
+</Base>
