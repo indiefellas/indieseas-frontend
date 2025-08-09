@@ -108,14 +108,14 @@ console.log(searchResults);
                     <div class="result">
                         <p class="small">{r.url}</p>
                         <a href={"//" + r.url}>
-                            <h2>{r.title || r.url}</h2>
+                            <h3>{r.title || r.url}</h3>
                         </a>
                         <p id="desc">{r.description}</p>
                     </div>
                 ))
             ) : (
                 <div>
-                    <h1>No results found.</h1>
+                    <h2>No results found.</h2>
                     <p>Try modifying your query?</p>
                 </div>
             )
